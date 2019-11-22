@@ -110,6 +110,7 @@ class TestMaybe:
 
                 m = Maybe(a)
                 assert m.attr == b
+                assert m['attr'] == b
 
             def test_chained_exists(self):
                 c = self.Foo(None)
@@ -123,6 +124,24 @@ class TestMaybe:
                 a = self.Foo(None)
                 m = Maybe(a)
                 assert m.attr.attr.get_maybe() is EMPTY
+
+        class TestAttributeOrIndex:
+
+            class _Tester:
+
+                def __init__(self):
+                    self.map = {}
+
+                def __getitem__(self, name: str):
+                    return self.map[name]
+
+            def test_attribute_index_order(self):
+                t = self._Tester()
+                t.map['foo'] = 1
+                assert t['foo'] == 1
+                t.foo = 2
+                assert t.foo == 2
+                assert t.map['foo'] == 1
 
 
     class TestGetMaybe:

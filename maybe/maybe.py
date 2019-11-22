@@ -61,7 +61,7 @@ class Maybe:
     def __getitem__(self, item):
         try:
             return Maybe(self.__value[item])
-        except (IndexError, KeyError):
+        except (IndexError, KeyError, TypeError):
             return Maybe(getattr(self, item, EMPTY))
 
     def __getattr__(self, name: str):
