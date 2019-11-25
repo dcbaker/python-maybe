@@ -19,18 +19,6 @@ class _Empty:
     def __eq__(self, other) -> typing.Union[bool, 'NotImplemented']:
         return isinstance(other, type(self))
 
-    def __lt__(self, other):
-        return False
-
-    def __le__(self, other):
-        return False
-
-    def __ge__(self, other):
-        return False
-
-    def __gt__(self, other):
-        return False
-
     def __repr__(self):
         return '_Empty()'
 
