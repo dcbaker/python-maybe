@@ -78,7 +78,7 @@ class Maybe:
         This provides either the internal value if that value is not EMPTY,
         if it is EMPTY then the fallback value will be returned.
         """
-        if self.is_something():
+        if self.is_nothing():
             return fallback
         return self.__value
 
