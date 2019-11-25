@@ -151,6 +151,9 @@ class Maybe:
     def __format__(self, format_spec):
         return self.__value.__format__(format_spec)
 
+    def __bool__(self):
+        return bool(self.__value)
+
     def __hash__(self):
         # This must return the hash of self.__value because it has an __eq__
         # method

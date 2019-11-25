@@ -104,6 +104,10 @@ class TestMaybe:
             with pytest.raises(TypeError):
                 b = {e}
 
+        def test_bool(self):
+            e = Maybe(7)
+            assert bool(e)
+
         class TestAttributes:
 
             class Foo:
