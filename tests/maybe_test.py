@@ -5,7 +5,7 @@
 
 import pytest
 
-from maybe.maybe import Maybe, EMPTY
+from maybe.maybe import Maybe, EMPTY, AsMaybe
 
 
 class TestMaybe:
@@ -209,3 +209,20 @@ class TestMaybe:
         def test_none(self):
             value = Maybe(None)
             assert value.is_something()
+
+    class TestAsMaybe:
+
+        @pytest.mark.parametrize('d', AsMaybe)
+        def test_empty(self, d: AsMaybe):
+            m = Maybe(EMPTY)
+            assert m.as_maybe(d).is_nothing()
+
+        @pytest.mark.parametrize('d', AsMaybe)
+        def test_valid(self, d: AsMaybe):
+            m = Maybe(1)
+            assert m.as_maybe(d).is_something()
+
+        @pytest.mark.parametrize('d', [AsMaybe.BYTES, AsMaybe.INT, AsMaybe.FLOAT])
+        def test_invalid(self, d: AsMaybe):
+            m = Maybe(NotImplemented)
+            assert m.as_maybe(d).is_nothing()

@@ -3,6 +3,7 @@
 # This software is released under the MIT License.
 # https://opensource.org/licenses/MIT
 
+import enum
 import typing
 
 class _Empty:
@@ -20,7 +21,7 @@ class _Empty:
         return isinstance(other, type(self))
 
     def __repr__(self):
-        return '_Empty()'
+        return 'EMPTY'
 
     def __hash__(self):
         return hash('PYTHON MAYBE EMPTY')
@@ -32,6 +33,21 @@ EMPTY = _Empty()
 def _nothing() -> 'Maybe':
     """internal helper for an empty Maybe()."""
     return Maybe(EMPTY)
+
+
+@enum.unique
+class AsMaybe(enum.Enum):
+
+    """Enum to provide maybe() wrappers for dunder methods accessed by type
+    casts.
+    """
+
+    STR = enum.auto()
+    BYTES = enum.auto()
+    INT = enum.auto()
+    FLOAT = enum.auto()
+    BOOL = enum.auto()
+    HASH = enum.auto()
 
 
 class Maybe:
@@ -88,6 +104,49 @@ class Maybe:
         Returns True if the value is not EMPTY, otherwise False.
         """
         return self.__value is not EMPTY
+
+    def as_maybe(self, dunder: AsMaybe) -> 'Maybe':
+        """Get dunders wrapped in Maybes.
+
+        Python-maybe does not wrap most dunders in maybes, becuase those are
+        generally called by type changing functions, `__str__` is called by
+        `str` for example. If python-maybe wrapped the result of `str` in a
+        `Maybe` it would break the assumption of the caller that they're
+        getting a `str` instance. Since is however useful to get
+        type-changing dunders wrapped in `Maybe`s python-maybe provides the
+        `as_maybe` method. This takes a single argument from the `AsMaybe`
+        enum for the dunder and returns a `Maybe` with the output or a
+        `Maybe` containing `EMPTY`.
+
+        >>> Maybe('1').as_maybe(AsMaybe.INT)
+        Maybe(1)
+        >>> Maybe(None).as_maybe(AsMaybe.BYTES)
+        Maybe(EMPTY)
+        >>> Maybe(EMPTY).as_maybe(AsMaybe.STR)
+        Maybe(EMPTY)
+        """
+        if self.is_nothing():
+            return _nothing()
+
+        if dunder is AsMaybe.STR:
+            f = str  # type: typing.Callable[[typing.Any], typing.Any]
+        elif dunder is AsMaybe.BYTES:
+            f = bytes
+        elif dunder is AsMaybe.INT:
+            f = int
+        elif dunder is AsMaybe.FLOAT:
+            f = float
+        elif dunder is AsMaybe.BOOL:
+            f = bool
+        elif dunder is AsMaybe.HASH:
+            f = hash
+        else:
+            raise RuntimeError('Unsupported dunder {!r}'.format(dunder))
+
+        try:
+            return Maybe(f(self.__value))
+        except TypeError:
+            return _nothing()
 
     def is_nothing(self) -> bool:
         """Is the value not EMPTY?
