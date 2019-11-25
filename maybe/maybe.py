@@ -43,7 +43,7 @@ class Maybe:
     This makes it safe to use with falsy values like False and None.
     """
 
-    __slots__= ('__value')
+    __slots__ = ('__value')
 
     def __init__(self, value) -> None:
         self.__value = value
