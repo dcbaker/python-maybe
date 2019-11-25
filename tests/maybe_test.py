@@ -25,6 +25,11 @@ class TestMaybe:
             e = v()
             assert e.is_nothing()
 
+        def test_call_error(self):
+            v = Maybe(int)
+            e = v("foo")
+            assert e.is_nothing()
+
         def test_getitem(self):
             e = [1, 2, 3]
             v = Maybe(e)

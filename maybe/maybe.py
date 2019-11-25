@@ -57,6 +57,41 @@ class Maybe:
     Maybe is a container that may or may not have a value. It uses a special
     sentinal value to track whether there is a value or not in the maybe.
     This makes it safe to use with falsy values like False and None.
+
+    This class is meant to be transparent as much as possible, but also
+    maximize chaining. To that end calls that are meant to return a specfic
+    type will always do so if possible, or error.
+
+    >>> bytes(Maybe(None))
+    Traceback (most recent call last):
+        ...
+    TypeError: cannot convert 'NoneType' object to bytes
+
+    Duner methods that are not expected to return a specific type will return
+    a value wrapped in another `Maybe`, for example:
+
+    >>> Maybe(int)("0")
+    Maybe(0)
+    >>> Maybe(int)("foo")
+    Maybe(EMPTY)
+
+    An `as_maybe` function is provided to allow accessing type specific
+    dunder methods in a Maybe() safe way.
+
+    >>> Maybe(None).as_maybe(AsMaybe.INT)
+    Maybe(EMPTY)
+    >>> Maybe("0").as_maybe(AsMaybe.INT)
+    Maybe(0)
+
+    Additionally there are methods for testing whether a `Maybe` contains a value or not:
+    >>> Maybe(EMPTY).is_nothing()
+    True
+    >>> Maybe(EMPTY).is_something()
+    False
+    >>> Maybe(None).is_nothing()
+    False
+    >>> Maybe(None).is_something()
+    True
     """
 
     __slots__ = ['__value']
@@ -65,9 +100,19 @@ class Maybe:
         self.__value = value
 
     def __call__(self, *args, **kwargs):
-        if callable(self.__value):
+        """Try to call the wrapped value with the given args.
+
+        It returns another `Maybe` with the value of the call, or if the call
+        fails for any reason it will contain `Empty`. Be aware that this can
+        hide failures caused by passing invalid values, but allows better chaining.
+
+        >>> Maybe(int)("foo").otherwise(0)
+        0
+        """
+        try:
             return Maybe(self.__value(*args, **kwargs))
-        return _nothing()
+        except Exception:
+            return _nothing()
 
     def __getitem__(self, item):
         try:
@@ -85,6 +130,11 @@ class Maybe:
         """Get the stored value out of the Maybe instance.
 
         If there is no value then EMPTY will be returned.
+
+        >>> Maybe(1).just()
+        1
+        >>> Maybe(EMPTY).just()
+        EMPTY
         """
         return self.__value
 
@@ -93,6 +143,11 @@ class Maybe:
 
         This provides either the internal value if that value is not EMPTY,
         if it is EMPTY then the fallback value will be returned.
+
+        >>> Maybe(1).otherwise(0)
+        1
+        >>> Maybe(EMPTY).otherwise(0)
+        0
         """
         if self.is_nothing():
             return fallback
@@ -102,8 +157,25 @@ class Maybe:
         """Is the value not EMPTY?
 
         Returns True if the value is not EMPTY, otherwise False.
+
+        >>> Maybe(False).is_something()
+        True
+        >>> Maybe(EMPTY).is_something()
+        False
         """
         return self.__value is not EMPTY
+
+    def is_nothing(self) -> bool:
+        """Is the value not EMPTY?
+
+        Returns True if the value is not EMPTY, otherwise False.
+
+        >>> Maybe(False).is_nothing()
+        False
+        >>> Maybe(EMPTY).is_nothing()
+        True
+        """
+        return self.__value is EMPTY
 
     def as_maybe(self, dunder: AsMaybe) -> 'Maybe':
         """Get dunders wrapped in Maybes.
@@ -147,13 +219,6 @@ class Maybe:
             return Maybe(f(self.__value))
         except TypeError:
             return _nothing()
-
-    def is_nothing(self) -> bool:
-        """Is the value not EMPTY?
-
-        Returns True if the value is not EMPTY, otherwise False.
-        """
-        return self.__value is EMPTY
 
     def __eq__(self, other):
         if isinstance(other, Maybe):
