@@ -41,6 +41,11 @@ class _Empty:
 EMPTY = _Empty()
 
 
+def _nothing() -> 'Maybe':
+    """internal helper for an empty Maybe()."""
+    return Maybe(EMPTY)
+
+
 class Maybe:
 
     """A container that may have a value in it.
@@ -55,8 +60,10 @@ class Maybe:
     def __init__(self, value) -> None:
         self.__value = value
 
-    def __call__(self, *args, **kwargs) -> None:
-        return self.__value(*args, **kwargs)
+    def __call__(self, *args, **kwargs):
+        if callable(self.__value):
+            return Maybe(self.__value(*args, **kwargs))
+        return _nothing()
 
     def __getitem__(self, item):
         try:
@@ -93,6 +100,13 @@ class Maybe:
         Returns True if the value is not EMPTY, otherwise False.
         """
         return self.__value is not EMPTY
+
+    def is_nothing(self) -> bool:
+        """Is the value not EMPTY?
+
+        Returns True if the value is not EMPTY, otherwise False.
+        """
+        return self.__value is EMPTY
 
     def __eq__(self, other):
         if isinstance(other, Maybe):

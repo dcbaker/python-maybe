@@ -17,7 +17,13 @@ class TestMaybe:
                 return True
 
             v = Maybe(foo)
-            assert v()
+            assert v().just() is True
+
+        def test_call_nocall(self):
+            class A: pass
+            v = Maybe(A())
+            e = v()
+            assert e.is_nothing()
 
         def test_getitem(self):
             e = [1, 2, 3]
