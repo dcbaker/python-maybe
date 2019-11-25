@@ -123,7 +123,7 @@ class TestMaybe:
             def test_chained_not_exists(self):
                 a = self.Foo(None)
                 m = Maybe(a)
-                assert m.attr.attr.get_maybe() is EMPTY
+                assert m.attr.attr.just() is EMPTY
 
         class TestAttributeOrIndex:
 
@@ -144,19 +144,19 @@ class TestMaybe:
                 assert t.map['foo'] == 1
 
 
-    class TestGetMaybe:
+    class TestJust:
 
         def test_something(self):
             value = Maybe('1')
-            assert value.get_maybe() == '1'
+            assert value.just() == '1'
 
         def test_nothing(self):
             value = Maybe(EMPTY)
-            assert value.get_maybe() is EMPTY
+            assert value.just() is EMPTY
 
         def test_none(self):
             value = Maybe(None)
-            assert value.get_maybe() is None
+            assert value.just() is None
 
 
     class TestOtherwise:

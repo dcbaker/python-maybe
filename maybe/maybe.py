@@ -70,7 +70,7 @@ class Maybe:
         except AttributeError:
             return Maybe(getattr(self.__value, name, EMPTY))
 
-    def get_maybe(self):
+    def just(self):
         """Get the stored value out of the Maybe instance.
 
         If there is no value then EMPTY will be returned.
@@ -96,28 +96,28 @@ class Maybe:
 
     def __eq__(self, other):
         if isinstance(other, Maybe):
-            return self.get_maybe() == other.get_maybe()
-        return self.get_maybe() == other
+            return self.just() == other.just()
+        return self.just() == other
 
     def __lt__(self, other):
         if isinstance(other, Maybe):
-            return self.get_maybe() < other.get_maybe()
-        return self.get_maybe() < other
+            return self.just() < other.just()
+        return self.just() < other
 
     def __le__(self, other):
         if isinstance(other, Maybe):
-            return self.get_maybe() <= other.get_maybe()
-        return self.get_maybe() <= other
+            return self.just() <= other.just()
+        return self.just() <= other
 
     def __ge__(self, other):
         if isinstance(other, Maybe):
-            return self.get_maybe() >= other.get_maybe()
-        return self.get_maybe() >= other
+            return self.just() >= other.just()
+        return self.just() >= other
 
     def __gt__(self, other):
         if isinstance(other, Maybe):
-            return self.get_maybe() > other.get_maybe()
-        return self.get_maybe() > other
+            return self.just() > other.just()
+        return self.just() > other
 
     def __str__(self):
         return str(self.__value)
